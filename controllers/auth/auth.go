@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"gin-blog/models"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 var uniqueValidator validator.Func = func(fl validator.FieldLevel) bool {
@@ -34,9 +36,19 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
 type RegisterInput struct {
 	Username string `json:"username" binding:"required,unique=username"`
 	Email    string `json:"email" binding:"required,unique=email"`
+	Password string `json:"password" binding:"required"`
+}
+
+type LoginInput struct {
+	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -69,4 +81,37 @@ func Register(c *gin.Context) {
 
 	c.JSON(http.StatusOK, newUser)
 
+}
+
+func Login(c *gin.Context) {
+	var loginInput LoginInput
+
+	if err := c.ShouldBindJSON(&loginInput); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user models.User
+
+	db, err := models.Database()
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	err = db.Where("username = ?", loginInput.Username).Find(&user).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not a registered user"})
+		return
+	}
+
+	match := CheckPasswordHash(loginInput.Password, user.Password)
+
+	if !match {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Incorrect password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }

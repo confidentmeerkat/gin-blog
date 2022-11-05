@@ -18,6 +18,7 @@ func main() {
 	router.GET("/test", Test)
 	router.GET("/users", user.Index)
 	router.POST("/register", auth.Register)
+	router.POST("/login", auth.Login)
 
 	router.Run("localhost:8080")
 }
