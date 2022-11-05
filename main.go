@@ -3,9 +3,11 @@ package main
 import (
 	"gin-blog/controllers/auth"
 	"gin-blog/controllers/user"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func Test(c *gin.Context) {
@@ -13,6 +15,11 @@ func Test(c *gin.Context) {
 }
 
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	router := gin.Default()
 
 	router.GET("/test", Test)

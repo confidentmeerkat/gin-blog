@@ -6,10 +6,13 @@ import (
 	"gin-blog/models"
 	"log"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -39,6 +42,26 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+func GenerateJWT(username string) (string, error) {
+	secretKey := os.Getenv("SECRET")
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+
+	claims["authorized"] = true
+	claims["username"] = username
+	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+
+	mySecret := []byte(secretKey)
+
+	tokenString, err := token.SignedString(mySecret)
+
+	if err != nil {
+		log.Fatal(err.Error())
+		return "", err
+	}
+	return tokenString, nil
 }
 
 type RegisterInput struct {
@@ -113,5 +136,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	token, _ := GenerateJWT(user.Username)
+
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }
