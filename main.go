@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gin-blog/controllers/user"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +15,7 @@ func main() {
 	router := gin.Default()
 
 	router.GET("/test", Test)
+	router.GET("/users", user.Index)
 
 	router.Run("localhost:8080")
 }
