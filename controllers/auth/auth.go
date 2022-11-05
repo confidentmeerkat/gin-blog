@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var uniqueValidator validator.Func = func(fl validator.FieldLevel) bool {
@@ -25,6 +26,12 @@ var uniqueValidator validator.Func = func(fl validator.FieldLevel) bool {
 	}
 
 	return true
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+
+	return string(bytes), err
 }
 
 type RegisterInput struct {
@@ -45,7 +52,9 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	newUser := models.User{Username: registerInput.Username, Email: registerInput.Email, Password: registerInput.Password}
+	hashedPassword, _ := HashPassword(registerInput.Password)
+
+	newUser := models.User{Username: registerInput.Username, Email: registerInput.Email, Password: hashedPassword}
 
 	db, err := models.Database()
 
