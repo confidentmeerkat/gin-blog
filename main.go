@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gin-blog/controllers/auth"
 	"gin-blog/controllers/user"
 	"net/http"
 
@@ -16,6 +17,7 @@ func main() {
 
 	router.GET("/test", Test)
 	router.GET("/users", user.Index)
+	router.POST("/register", auth.Register)
 
 	router.Run("localhost:8080")
 }
