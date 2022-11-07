@@ -3,6 +3,7 @@ package main
 import (
 	"gin-blog/controllers/auth"
 	"gin-blog/controllers/user"
+	"gin-blog/middlewares"
 	"log"
 	"net/http"
 
@@ -22,10 +23,16 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("/test", Test)
+	authorized := router.Group("/")
+
+	// router.GET("/test", Test)
 	router.GET("/users", user.Index)
 	router.POST("/register", auth.Register)
 	router.POST("/login", auth.Login)
+
+	authorized.Use(middlewares.AuthenticationMiddleware())
+	authorized.GET("/test", Test)
+	authorized.GET("/me", auth.Currentuser)
 
 	router.Run("localhost:8080")
 }

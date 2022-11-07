@@ -140,3 +140,22 @@ func Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
+
+func Currentuser(c *gin.Context) {
+	username := c.GetString("username")
+
+	db, err := models.Database()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	var user models.User
+	err = db.Where("username = ?", username).Find(&user).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusNetworkAuthenticationRequired, "Incorrect user")
+	}
+
+	c.JSON(http.StatusOK, user)
+
+}
