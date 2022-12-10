@@ -2,17 +2,20 @@ package models
 
 import (
 	"log"
+	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func Database() (*gorm.DB, error) {
-	dbURL := "postgres://postgres:cm1108@Jupiter@localhost:5432/gin-blog"
-
+	dbURL := os.Getenv("DB_URL")
 	db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
+	if err != nil {
+		log.Println(err)
+	}
 
-	if err = db.AutoMigrate(&User{}); err != nil {
+	if err = db.AutoMigrate(&User{}, &Post{}); err != nil {
 		log.Println(err)
 	}
 
