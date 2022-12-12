@@ -26,8 +26,8 @@ var uniqueValidator validator.Func = func(fl validator.FieldLevel) bool {
 
 	result := db.Where(fmt.Sprintf("%s = ?", match), field).Find(&user)
 
-	if result.RowsAffected > 0 {
-		return false
+	if result.RowsAffected <= 0 {
+		return true
 	}
 
 	return true
@@ -75,6 +75,13 @@ type LoginInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// @Summary Register an user
+// @Description Create a new user
+// @Accept  json
+// @Produce  json
+// @Param payload body auth.RegisterInput true "User Register information"
+// @Success 200 {object} models.User
+// @Router /register [post]
 func Register(c *gin.Context) {
 	var registerInput RegisterInput
 
