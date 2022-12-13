@@ -13,11 +13,22 @@ definitions:
     - password
     - username
     type: object
+  gorm.DeletedAt:
+    $ref: '#/definitions/sql.NullTime'
   models.User:
     properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+        type: object
       email:
         type: string
+      id:
+        type: integer
       password:
+        type: string
+      updatedAt:
         type: string
       username:
         type: string

@@ -77,13 +77,29 @@ var doc = `{
                 }
             }
         },
+        "gorm.DeletedAt": {
+            "$ref": "#/definitions/sql.NullTime"
+        },
         "models.User": {
             "type": "object",
             "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "object",
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
                 "email": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "password": {
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 },
                 "username": {
