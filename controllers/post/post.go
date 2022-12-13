@@ -1,7 +1,6 @@
 package post
 
 import (
-	"fmt"
 	"gin-blog/models"
 	"log"
 	"net/http"
@@ -9,16 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Index(c *gin.Context) {
-	var posts []models.Post
+type PostShow struct {
+	models.Post
+	Author models.UserPublic
+}
 
+func Index(c *gin.Context) {
+	var posts []PostShow
 	db, err := models.Database()
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	db.Find(&posts)
+	db.Model(&models.Post{}).Joins("Author", db.Select("username", "id")).Find(&posts)
 
 	c.JSON(http.StatusOK, posts)
 }
@@ -30,7 +33,6 @@ type NewPost struct {
 
 func Create(c *gin.Context) {
 	username := c.GetString("username")
-	fmt.Println("username :", username)
 	var newPostInput NewPost
 
 	if err := c.ShouldBindJSON(&newPostInput); err != nil {
@@ -45,9 +47,8 @@ func Create(c *gin.Context) {
 
 	var user models.User
 	db.Where("username = ?", username).Find(&user)
-	fmt.Println("user :", user)
 
-	newPost := models.Post{Title: newPostInput.Title, Content: newPostInput.Content, AuthorID: int(user.ID)}
+	newPost := models.Post{Title: newPostInput.Title, Content: newPostInput.Content, Author: user}
 
 	db.Create(&newPost)
 
