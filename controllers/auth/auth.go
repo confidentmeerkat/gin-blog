@@ -18,6 +18,8 @@ import (
 )
 
 var uniqueValidator validator.Func = func(fl validator.FieldLevel) bool {
+	fmt.Print("passed unique validator")
+
 	field := fl.Field().String()
 	match := fl.Param()
 
@@ -30,7 +32,7 @@ var uniqueValidator validator.Func = func(fl validator.FieldLevel) bool {
 		return true
 	}
 
-	return true
+	return false
 }
 
 func HashPassword(password string) (string, error) {
