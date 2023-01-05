@@ -112,7 +112,6 @@ func Register(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, newUser)
-
 }
 
 func Login(c *gin.Context) {
@@ -150,6 +149,11 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
+type Auth struct {
+	models.UserPublic
+	Email string `json:"email"`
+}
+
 func Currentuser(c *gin.Context) {
 	username := c.GetString("username")
 
@@ -158,13 +162,12 @@ func Currentuser(c *gin.Context) {
 		log.Fatal(err.Error())
 	}
 
-	var user models.User
-	err = db.Where("username = ?", username).Find(&user).Error
+	var user Auth
+	err = db.Model(&models.User{}).Where("username = ?", username).Find(&user).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusNetworkAuthenticationRequired, "Incorrect user")
 	}
 
 	c.JSON(http.StatusOK, user)
-
 }
